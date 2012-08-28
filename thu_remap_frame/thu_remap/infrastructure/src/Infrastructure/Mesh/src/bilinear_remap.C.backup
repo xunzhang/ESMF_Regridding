@@ -1,0 +1,227 @@
+#include "bilinear_remap.h"
+//#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+#include <string.h>
+#include "grid.h"
+
+#include "t_get_nbr.h"
+
+bilinear_remap_2D_operator::bilinear_remap_2D_operator(grid *out_grid_src, grid *out_grid_dst):Common_remap(out_grid_src, out_grid_dst)
+{
+	int i,j;
+
+
+	grid_src_local = out_grid_src; 
+	grid_dst_local = out_grid_dst;
+
+	nlon_each_lat_src=grid_src_local->get_nlon_each_lat();
+	nlon_each_lat_dst=grid_dst_local->get_nlon_each_lat();
+	printf("diandiandian\n");
+
+	lat_begindx_src = new int [num_lats_src];
+	lat_begindx_dst = new int [num_lats_dst];
+	num_wgts = npts_dst * 4;
+	
+	printf("%d xiabuqu\n", num_wgts);
+	printf("guo le \n");
+	
+	
+	//wgt_indx_src = new int [num_wgts];
+	printf("2putong youngth\n");
+	wgt_indx_dst = NULL;
+	printf("2putong youngth\n");
+	//wgt_values = new double [num_wgts];
+	printf("3putong youngth\n");
+		
+	lat_begindx_src[0] = 0;
+	for(i = 1; i < num_lats_src; i ++) 
+		lat_begindx_src[i] = lat_begindx_src[i - 1] + nlon_each_lat_src[i - 1];
+		
+	lat_begindx_dst[0] = 0;
+	for(i = 1; i < num_lats_dst; i ++)
+		lat_begindx_dst[i] = lat_begindx_dst[i - 1] + nlon_each_lat_dst[i - 1];
+}
+
+
+bilinear_remap_2D_operator::~bilinear_remap_2D_operator()
+{
+	delete [] lat_begindx_src;
+	delete [] lat_begindx_dst;
+	//delete [] wgt_indx_src;
+	//delete [] wgt_values;
+}
+
+
+void bilinear_remap_2D_operator::wgt_bilinear_regular( double *lons_src,
+                                                                         double *lats_src,
+                                                                         double lon_dst,
+                                                                         double lat_dst,
+                                                                         double *wgts) 
+{
+	double t1,t2;
+	double u;
+
+	if (!((lon_dst >= lons_src[0]) &&
+		(lons_src[1] >= lons_src[0]))) {
+		if (lon_dst < lons_src[0])
+			lon_dst += 360;
+		if (lons_src[1] < lons_src[0])
+			lons_src[1] += 360;
+	}
+	if (!((lon_dst >= lons_src[2]) &&
+		(lons_src[3] >= lons_src[2]))) {
+		if (lon_dst < lons_src[2])
+			lon_dst += 360;
+		if (lons_src[3] < lons_src[2])
+			lons_src[3] += 360;
+	}
+	t1=(lon_dst-lons_src[0])/(lons_src[1]-lons_src[0]);
+	t2=(lon_dst-lons_src[2])/(lons_src[3]-lons_src[2]);
+	u=(lat_dst-lats_src[0])/(lats_src[1]-lats_src[0]);
+	wgts[0] = (1 - u) * (1 - t1);
+	wgts[1] = (1 - u) * t1;
+	wgts[2] = u * (1 - t2);
+	wgts[3] = u * t2;
+}			 
+
+
+
+bool bilinear_remap_2D_operator::wgt_bilinear_irregular( double *lons_src,
+                                                                           double *lats_src,
+                                                                           double lon_dst,
+                                                                           double lat_dst,
+                                                                           double *wgts) 
+{
+	double dth1, dth2, dth3, dthp;
+	double dph1, dph2, dph3, dphp;
+	double iguess, jguess;
+	double mat1, mat2, mat3, mat4;
+	int iter, max_iter = 100;
+	double determinant, deli, delj;
+	double converge = 0.0000000001;
+
+	dth1 = lats_src[1] - lats_src[0];
+	dth2 = lats_src[3] - lats_src[0];
+	dth3 = lats_src[2] - lats_src[1] - dth2;
+	dph1 = lons_src[1] - lons_src[0];
+	dph2 = lons_src[3] - lons_src[0];
+	dph3 = lons_src[2] - lons_src[1];
+	if (dph1 >  540) 
+		dph1 = dph1 - 360;
+	if (dph2 >  540) 
+		dph2 = dph2 - 360;
+	if (dph3 >  540) 
+		dph3 = dph3 - 360;
+	if (dph1 < -540) 
+		dph1 = dph1 + 360;
+	if (dph2 < -540) 
+		dph2 = dph2 + 360;
+	if (dph3 < -540) 
+		dph3 = dph3 + 360;
+	dph3 = dph3 - dph2;
+	iguess = 0.5;
+	jguess = 0.5;
+
+	for (iter = 0; iter < max_iter; iter ++) {
+		dthp = lat_dst - lats_src[0] - dth1*iguess - dth2*jguess - dth3*iguess*jguess;
+		dphp = lon_dst - lons_src[0];
+		if (dphp >  540) dphp = dphp - 360;
+		if (dphp < -540) dphp = dphp + 360;
+		dphp = dphp - dph1*iguess - dph2*jguess - dph3*iguess*jguess;
+		mat1 = dth1 + dth3*jguess;
+		mat2 = dth2 + dth3*iguess;
+		mat3 = dph1 + dph3*jguess;
+		mat4 = dph2 + dph3*iguess;
+		
+		determinant = mat1*mat4 - mat2*mat3;
+		deli = (dthp*mat4 - mat2*dphp) / determinant;
+		delj = (mat1*dphp - dthp*mat3) / determinant;
+            if (fabs(deli) < converge && fabs(delj) < converge)
+			break;
+
+            iguess = iguess + deli;
+            jguess = jguess + delj;
+	}
+
+	if (iter < max_iter) {
+		wgts[0] = (1.0-iguess) * (1.0-jguess);
+		wgts[1] = iguess * (1.0-jguess); 
+		wgts[2] = iguess * jguess; 
+		wgts[3] = (1.0-iguess) * jguess;
+		return true;
+	}
+	else return false;
+}			 
+
+
+void bilinear_remap_2D_operator::init_remap()
+{
+	printf("zheyexing\n");
+	printf("xin fan\n");
+}
+/*
+void bilinear_remap_2D_operator::cal_remap(double *data_src, double *data_dst)
+{
+
+	int i, j, lb,ub = 0;
+	int *local_point_indx_src = wgt_indx_src;
+	double *local_wgts = wgt_values;
+
+	for (i = 0, j = 0; i < npts_dst; i ++) {
+		data_dst[i] = data_src[local_point_indx_src[j]] * local_wgts[j] +
+		                   data_src[local_point_indx_src[j + 1]] * local_wgts[j + 1] +
+		                   data_src[local_point_indx_src[j + 2]] * local_wgts[j + 2] +
+		                   data_src[local_point_indx_src[j + 3]] * local_wgts[j + 3];
+		j += 4;
+	}
+}
+*/
+bool bilinear_remap_2D_operator::point_in_polygon(double lat_dst, 
+                                                                     double lon_dst, 
+                                                                     int ncorner, 
+                                                                     double *lats_src, 
+                                                                     double*lons_src)
+{
+	double lon_diff1, lon_diff2;
+	double lat_diff1, lat_diff2;
+	int i, next_i;
+	double cross_product, cross_product_last;
+	
+	
+	lon_diff1 = lons_src[0] - lon_dst;
+	if (lon_diff1 > 180)
+		lons_src[0] = lons_src[0] - 360;
+	else if (lon_diff1 < -180) 
+		lons_src[0] = lons_src[0] + 360;
+	for (i = 1; i < ncorner; i ++) {
+		lon_diff1 = lons_src[i] - lons_src[0];
+		if (lon_diff1 >  180)
+			lons_src[i] = lons_src[i] - 360;
+		else if (lon_diff1 < -180)
+			lons_src[i] = lons_src[i] + 360;
+	}
+	for (i = 0; i < ncorner; i ++) {
+		next_i = (i + 1) % ncorner;
+		lat_diff1 = lats_src[next_i] - lats_src[i];
+		lon_diff1 = lons_src[next_i] - lons_src[i];
+		lat_diff2 = lat_dst - lats_src[i];
+		lon_diff2 = lon_dst - lons_src[i];
+		if (lon_diff1 >  540)
+			lon_diff1 = lon_diff1 - 360;
+		else if (lon_diff1 < -540)
+			lon_diff1 = lon_diff1 + 360;
+		if (lon_diff2 > 540)
+			lon_diff2 = lon_diff2 - 360;
+		else if (lon_diff2 < -540)
+			lon_diff2 = lon_diff2 + 360;
+		cross_product = lon_diff1*lat_diff2 - lon_diff2*lat_diff1;
+		if (i == 0) 
+			cross_product_last = cross_product;
+		if (cross_product*cross_product_last < 0) 
+			return false;
+		cross_product_last = cross_product;
+	}
+	return true;
+}
+

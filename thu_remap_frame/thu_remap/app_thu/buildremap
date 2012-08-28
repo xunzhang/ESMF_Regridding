@@ -1,0 +1,1 @@
+g++ -g -I/opt/intel/netCDF/include/ THU_Remap_Field.cpp -o THU_Remap_Field -L/opt/intel/netCDF/lib -lnetcdf

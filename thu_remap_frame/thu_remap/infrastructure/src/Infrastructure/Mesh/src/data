@@ -1,0 +1,29 @@
+ESMCI_Integrate.C:	double *c = cfield->data(node);
+ESMCI_Integrate.C:	double *c = cfield->data(node);
+ESMCI_Interp.C:  UInt nrhs = field->dim();
+ESMCI_Interp.C:        if (dfield->OnObj(snode)) {
+ESMCI_Interp.C:     //     UInt fdim = dfield->dim();
+ESMCI_Interp.C:          double *data = dfield->data(snode);
+ESMCI_Interp.C:            dof_add_col addc(col, dfield->dim(), sens);
+ESMCI_Interp.C:            int dof_div_dim = nlocal_dof/dfield->dim();
+ESMCI_Interp.C:for (UInt s = 0; s < nlocal_dof/dfield->dim(); s++) {
+ESMCI_Interp.C:        double *msk=src_mask_field->data(src_elem);
+ESMCI_Interp.C:        double *msk=dst_mask_field->data(dst_elem);
+ESMCI_Interp.C:        double *msk=src_mask_field->data(src_elem);
+ESMCI_Interp.C:        double *msk=dst_mask_field->data(dst_elem);
+ESMCI_MathUtil.C:	double *c = cfield->data(node);
+ESMCI_MeshExodus.C:          nfield->set_output_status(true);
+ESMCI_MeshExodus.C:          //ex_get_nodal_var(exoid, time, i+1, num_nodes, nfield->raw_data());
+ESMCI_MeshExodus.C:            double *d = nfield->data(*ni);
+ESMCI_MeshExodus.C:          efield->set_output_status(true);
+ESMCI_MeshExodus.C:          //ex_get_nodal_var(exoid, time, i+1, num_nodes, nfield->raw_data());
+ESMCI_MeshExodus.C:            double *d = efield->data(*ni);
+ESMCI_MeshPartition.C:      double *c = tcfield->data(*ni);
+ESMCI_MeshPartition.C:      if (nfield->name() == "coordinates") nfield->SetOutput(false);
+ESMCI_MeshRegrid.C:	double fuck_c = src_field->data(3);
+ESMCI_MeshUtils.C:   double *coord = cfield->data(node);
+ESMCI_MeshUtils.C: if (cfield->GetMEFamily().is_nodal()) {
+ESMCI_MeshUtils.C:   _field *cf = cfield->GetNodalfield();
+ESMCI_MeshUtils.C: } else Throw() << "GetMeshCoords for non nodal coord field not yet implemented!! MEfamily=" << cfield->GetMEFamily().name();
+ESMCI_MeshVTK.C:          double *d = nfield->data(obj);
+ESMCI_PatchRecovery.C:  bool use_mc = (pcfield->dim() > (UInt)pmesh->parametric_dim());

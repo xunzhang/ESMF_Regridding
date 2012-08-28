@@ -1,0 +1,27 @@
+echo "cp bilinear_remap.h "
+cp bilinear_remap.h $THU_REMAP_DIR/src/Infrastructure/Mesh/include/
+echo "cp grid.h "
+cp grid.h $THU_REMAP_DIR/src/Infrastructure/Mesh/include/
+echo "cp name_cfg.h "
+cp name_cfg.h $THU_REMAP_DIR/src/Infrastructure/Mesh/include/
+echo "cp remap_base.h "
+cp remap_base.h $THU_REMAP_DIR/src/Infrastructure/Mesh/include/
+echo "cp t_get_nbr.h "
+cp t_get_nbr.h $THU_REMAP_DIR/src/Infrastructure/Mesh/include/
+echo "cp t_sort.h "
+cp t_sort.h $THU_REMAP_DIR/src/Infrastructure/Mesh/include/
+echo "cp bilinear_remap.C "
+cp bilinear_remap.C $THU_REMAP_DIR/src/Infrastructure/Mesh/src/
+echo "cp grid.C "
+cp grid.C $THU_REMAP_DIR/src/Infrastructure/Mesh/src/
+echo "cp remap_basis.C "
+cp remap_basis.C $THU_REMAP_DIR/src/Infrastructure/Mesh/src/
+echo "cp t_sort.C "
+cp t_sort.C $THU_REMAP_DIR/src/Infrastructure/Mesh/src/
+echo "cp t_get_nbr.C "
+cp t_get_nbr.C $THU_REMAP_DIR/src/Infrastructure/Mesh/src/
+echo "cp ESMCI_MeshRegrid.C "
+cp ESMCI_MeshRegrid.C $THU_REMAP_DIR/src/Infrastructure/Mesh/src/
+echo "cp makefile "
+cp makefile $THU_REMAP_DIR/src/Infrastructure/Mesh/src/
+
