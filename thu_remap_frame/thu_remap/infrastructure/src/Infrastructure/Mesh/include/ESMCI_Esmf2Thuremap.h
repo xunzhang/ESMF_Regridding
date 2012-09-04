@@ -117,15 +117,15 @@ class PatchRect : public Patch {
 public: 
 
   PatchRect(const int &npnts, const double* coords_lon, const double* coords_lat, const bool* coords_mask) : Patch(npnts, coords_lon, coords_lat, coords_mask) { 
-	  printf("sdgadljljlj\n"); 
 	  compact_by_sort(); 
+	 
 	  if(v_lon.size() * v_lat.size() != size) {
 		std::cout << "v_lon.size is ()" << v_lon.size() << std::endl;
 		std::cout << "v_lat.size is ()" << v_lat.size() << std::endl;
 		std::cout << "size is ()" << size << std::endl;
 	    std::cout << "is not rect, are you kidding me??\n";
-		exit(1);
 	  }
+	  
   }
   
   int get_lon_size() { return v_lon.size(); }
@@ -198,6 +198,7 @@ public:
     for(int i = 0; i < size - 1; ++i) 
       if(fabs(points_set[i].lat - points_set[i+1].lat) > 1e-10) 
         v_lat.push_back(points_set[i + 1].lat);
+	std::cout << v_lon.size() << " manimani " << v_lat.size() << std::endl;
     	
   }
 
@@ -224,18 +225,17 @@ public:
 
   void reorder(double* r_coords_lon, double* r_coords_lat) {
    
-	printf("enter reorder %d %d\n", v_lon.size(), v_lat.size());
     for(int i = 0; i < v_lon.size(); ++i) {
       for(int j = 0; j < v_lat.size(); ++j) {
         r_coords_lon[j*v_lon.size()+i] = v_lon[i];
         r_coords_lat[j*v_lon.size()+i] = v_lat[j];
       }
     }
-	printf("exit reorder\n");
   }
 
   void get_reorder_mask(bool* mask) {
     
+	printf("enter get_reorder_mask.\n");
     point tmp;
     for(int i = 0; i < v_lon.size(); ++i) {
       for(int j = 0; j < v_lat.size(); ++j) {
@@ -244,6 +244,7 @@ public:
 		mask[j * v_lon.size() + i] = points_mask[tmp];
       }
     }
+	printf("exit get_reorder_mask.\n");
   }
 
 private:
